@@ -1,83 +1,70 @@
-# サーバー課金システム (Server Billing System)
+# Server Billing System
 
-サーバーの稼働時間に応じてStripeで自動課金を行うPythonアプリケーションです。
+A Python application that performs automatic billing with Stripe based on server uptime.
 
-## 🚀 機能
+## 🚀 Features
 
-- **リアルタイム稼働時間監視**: psutilを使用してサーバーの正確な稼働時間を取得
-- **自動課金計算**: 稼働時間 × 時間単価で課金額を自動計算
-- **Stripe決済連携**: Payment IntentやInvoiceを使用した柔軟な決済オプション
-- **Webダッシュボード**: FastAPIベースのWebインターフェース
-- **リアルタイム更新**: 30秒ごとに課金情報を自動更新
+- **Real-time uptime monitoring**: Get accurate server uptime using psutil
+- **Automatic billing calculation**: Automatically calculate billing amount based on uptime × hourly rate
+- **Stripe payment integration**: Flexible payment options using Payment Intent and Invoice
+- **Web dashboard**: FastAPI-based web interface
+- **Real-time updates**: Automatically update billing information every 30 seconds
 
-## 📁 ファイル構成
+## 📁 File Structure
 
 ```
 stripe-python/
-├── requirements.txt        # 依存関係
-├── .env                   # 環境変数設定
-├── .env.example          # 環境変数テンプレート
-├── server_billing.py     # メイン課金ロジック
-├── web_app.py            # FastAPI Webアプリ
-└── README.md             # このファイル
+├── requirements.txt        # Dependencies
+├── .env                   # Environment variables
+├── .env.example          # Environment variables template
+├── server_billing.py     # Main billing logic
+├── web_app.py            # FastAPI Web application
+└── README.md             # This file
 ```
 
-## ⚙️ セットアップ
+## ⚙️ Setup
 
-### 1. 依存関係のインストール
+### 1. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Stripe設定
+### 2. Stripe Configuration
 
-#### 2.1 Stripeアカウント作成
-1. [Stripe公式サイト](https://stripe.com/jp)でアカウントを作成
-2. ダッシュボードにログイン
+#### 2.1 Create Stripe Account
+1. Create an account on [Stripe official website](https://stripe.com)
+2. Log in to the dashboard
 
-#### 2.2 APIキー取得
-1. Stripeダッシュボードで「開発者」→「APIキー」にアクセス
-2. テスト環境のキーをコピー：
-   - **Publishable key** (pk_test_で始まる)
-   - **Secret key** (sk_test_で始まる)
+#### 2.2 Get API Keys
+1. Access "Developers" → "API keys" in the Stripe dashboard
+2. Copy test environment keys:
+   - **Publishable key** (starts with pk_test_)
+   - **Secret key** (starts with sk_test_)
 
-#### 2.3 Webhook設定（オプション）
-1. 「開発者」→「Webhook」→「エンドポイントを追加」
-2. エンドポイントURL: `https://yourdomain.com/webhooks/stripe`
-3. イベント選択: `payment_intent.succeeded`, `invoice.payment_succeeded`
-4. Webhook署名シークレットをコピー
+#### 2.3 Webhook Setup (Optional)
+1. "Developers" → "Webhooks" → "Add endpoint"
+2. Endpoint URL: `https://yourdomain.com/webhooks/stripe`
+3. Select events: `payment_intent.succeeded`, `invoice.payment_succeeded`
+4. Copy webhook signing secret
 
-
-Other 5. ローカル開発環境では、Stripe CLIを使用してWebhookイベントを転送することも可能
-
-```bash
-stripe listen --forward-to localhost:8000/webhooks/stripe
-```
-### 2.3 Stripe CLIのインストール（ローカル開発用）
-Stripe CLIを使用してローカルでWebhookイベントをテストできます。
-1. [Stripe CLIのインストールガイド](https://stripe.com/docs/stripe-cli#install)に従ってインストール
-2. インストール後、以下のコマンドでログインします：
+### 2.4 Stripe CLI Installation (For Local Development)
+You can test webhook events locally using Stripe CLI.
+1. Follow the [Stripe CLI installation guide](https://stripe.com/docs/stripe-cli#install)
+2. After installation, log in with the following command:
 
 ```bash
 stripe login
 ```
-3. 
-```
+
+3. Forward webhook events to your local server:
+```bash
 stripe listen --forward-to localhost:8000/webhooks/stripe
 ```
-でローカルサーバーにWebhookイベントを転送
 
+### 3. Environment Variables Setup
 
-### 2.4 環境変数設定
-
-`.env.example`をコピーして`.env`を作成し、以下の内容を入力：
-
-```bash
-
-### 3. 環境変数設定
-
-`.env`ファイルを編集してStripe設定を追加：
+Copy `.env.example` to create `.env` and enter the following content:
 
 ```bash
 # Stripe Configuration
@@ -95,262 +82,257 @@ DEBUG=True
 PORT=8000
 ```
 
-## 🔧 使用方法
+## 🔧 Usage
 
-### 基本的な課金システム実行
+### Basic Billing System Execution
 
 ```bash
 python server_billing.py
 ```
 
-### Webアプリケーション起動
+### Start Web Application
 
 ```bash
 python web_app.py
 ```
 
-ブラウザで `http://localhost:8000` にアクセス
+Access `http://localhost:8000` in your browser
 
-### API利用例
+### API Usage Examples
 
-#### 課金状況取得
+#### Get Billing Status
 ```bash
 curl http://localhost:8000/api/billing-status
 ```
 
-#### Payment Intent作成
+#### Create Payment Intent
 ```bash
 curl -X POST http://localhost:8000/api/create-payment-intent \
   -H "Content-Type: application/json"
 ```
 
-#### 稼働時間取得
+#### Get Uptime
 ```bash
 curl http://localhost:8000/api/uptime
 ```
 
-## 🎯 Stripeダッシュボード設定手順
+## 🎯 Stripe Dashboard Setup Instructions
 
-### 1. テスト環境での確認
+### 1. Test Environment Verification
 
-1. **ダッシュボード概要**
-   - 「テストデータを表示」がオンになっていることを確認
-   - 支払い、顧客、商品のセクションで取引を監視
+1. **Dashboard Overview**
+   - Confirm that "View test data" is enabled
+   - Monitor transactions in payments, customers, and products sections
 
-2. **テスト用カード情報**
-   - カード番号: `4242424242424242`
-   - 有効期限: 任意の将来日付
-   - CVC: 任意の3桁
+2. **Test Card Information**
+   - Card number: `4242424242424242`
+   - Expiration date: Any future date
+   - CVC: Any 3 digits
 
-### 2. 商品・価格設定（オプション）
+### 2. Product/Price Setup (Optional)
 
-1. **商品作成**
-   - 「商品」→「商品を追加」
-   - 商品名: "サーバー利用料金"
-   - 説明: "時間単位でのサーバー利用料金"
+1. **Create Product**
+   - "Products" → "Add product"
+   - Product name: "Server Usage Fee"
+   - Description: "Hourly server usage fee"
 
-2. **価格設定**
-   - 料金モデル: 「一度限り」または「定期」
-   - 価格: 時間単価に応じて設定
-   - 通貨: JPY
+2. **Price Setting**
+   - Pricing model: "One-time" or "Recurring"
+   - Price: Set according to hourly rate
+   - Currency: JPY
 
-### 3. 顧客管理
+### 3. Customer Management
 
-1. **顧客登録**
-   - 「顧客」→「顧客を追加」
-   - 必要な顧客情報を入力
+1. **Customer Registration**
+   - "Customers" → "Add customer"
+   - Enter required customer information
 
-   例: 
-    - 名前: 山田 太郎
-    - メール: 
+   Example:
+   - Name: John Doe
+   - Email: john@example.com
 
-2. **支払い方法**
-   - 顧客の支払い方法を事前登録可能
+2. **Payment Methods**
+   - Customer payment methods can be pre-registered
 
-### 4. イベント監視
+### 4. Event Monitoring
 
-1. **ログ確認**
-   - 「開発者」→「ログ」で全APIリクエストを確認
-   - エラーやトラブルシューティングに活用
+1. **Log Verification**
+   - Check all API requests in "Developers" → "Logs"
+   - Use for error and troubleshooting
 
-2. **イベント確認**
-   - 「開発者」→「イベント」で Webhook イベントを確認
+2. **Event Verification**
+   - Check webhook events in "Developers" → "Events"
 
-## 💡 カスタマイズ
+## 💡 Customization
 
-### 課金レート変更
-`.env`ファイルの`HOURLY_RATE`を変更
+### Change Billing Rate
+Change `HOURLY_RATE` in the `.env` file
 
-### 通貨変更
-`.env`ファイルの`CURRENCY`を変更（usd, eur, jpy等）
+### Change Currency
+Change `CURRENCY` in the `.env` file (usd, eur, jpy, etc.)
 
-### 最小課金単位変更
-`server_billing.py`の`calculate_billing_amount`メソッドを編集
+### Change Minimum Billing Unit
+Edit the `calculate_billing_amount` method in `server_billing.py`
 
-## 🔒 セキュリティ注意事項
+## 🔒 Security Considerations
 
-1. **Secret Keyの保護**
-   - `.env`ファイルをgitリポジトリにコミットしない
-   - 本番環境では環境変数を使用
+1. **Protect Secret Key**
+   - Do not commit `.env` file to git repository
+   - Use environment variables in production
 
-2. **Webhook検証**
-   - 本番環境ではWebhook署名の検証を実装
+2. **Webhook Verification**
+   - Implement webhook signature verification in production
 
-3. **HTTPS使用**
-   - 本番環境では必ずHTTPSを使用
+3. **Use HTTPS**
+   - Always use HTTPS in production environment
 
-## 🐛 トラブルシューティング
+## 🐛 Troubleshooting
 
-### よくあるエラー
+### Common Errors
 
-1. **Stripe API Key エラー**
+1. **Stripe API Key Error**
    ```
    stripe.error.AuthenticationError
    ```
-   → `.env`ファイルのAPIキーを確認
+   → Check API keys in `.env` file
 
-2. **金額エラー**
+2. **Amount Error**
    ```
    Amount must be at least ¥1
    ```
-   → 最小課金額（1円）未満の場合のエラー
+   → Error when below minimum billing amount (1 yen)
 
-3. **ネットワークエラー**
+3. **Network Error**
    ```
    ConnectionError
    ```
-   → インターネット接続とStripeサービス状況を確認
+   → Check internet connection and Stripe service status
 
-### ログ確認方法
+### How to Check Logs
 
 ```bash
-# デバッグモードで実行
+# Run in debug mode
 DEBUG=True python server_billing.py
 ```
 
-## 📊 監視・分析
+## 📊 Monitoring & Analytics
 
-### Stripeダッシュボードでの分析
+### Analytics in Stripe Dashboard
 
-1. **売上分析**
-   - 日別・月別の売上推移
-   - 顧客別利用状況
+1. **Revenue Analysis**
+   - Daily/monthly revenue trends
+   - Customer usage patterns
 
-2. **失敗分析**
-   - 決済失敗率
-   - エラー原因分析
+2. **Failure Analysis**
+   - Payment failure rates
+   - Error cause analysis
 
-## 🚀 本番環境デプロイ
+## 🚀 Production Environment Deployment
 
-1. **環境変数設定**
+1. **Environment Variable Setup**
    ```bash
    export STRIPE_SECRET_KEY=sk_live_...
    export STRIPE_PUBLISHABLE_KEY=pk_live_...
    ```
 
-2. **HTTPS設定**
-   - SSL証明書の設定
-   - リバースプロキシ（nginx等）の設定
+2. **HTTPS Setup**
+   - SSL certificate configuration
+   - Reverse proxy (nginx, etc.) configuration
 
-3. **監視設定**
-   - サーバー監視
-   - ログ監視
-   - アラート設定
+3. **Monitoring Setup**
+   - Server monitoring
+   - Log monitoring
+   - Alert configuration
 
-## 📞 サポート
+## 📞 Support
 
-- Stripe公式ドキュメント: https://stripe.com/docs
-- Stripe日本語サポート: https://support.stripe.com/
+- Stripe Official Documentation: https://stripe.com/docs
+- Stripe Support: https://support.stripe.com/
 
 ---
 
-## 📖 web_app.py の詳細解説
+## 📖 Detailed Explanation of web_app.py
 
-### 概要
-`web_app.py`は、FastAPIを使用してサーバー課金システムのWebインターフェースを提供するメインアプリケーションです。このファイルには、Webアプリケーションのフロントエンドとバックエンドの両方の機能が含まれています。
+### Overview
+`web_app.py` is the main application that provides a web interface for the server billing system using FastAPI. This file contains both frontend and backend functionality for the web application.
 
-### 主要コンポーネント
+### Main Components
 
-#### 1. **FastAPIアプリケーション設定**
+#### 1. **FastAPI Application Setup**
 ```python
 app = FastAPI(title="Server Billing System", version="1.0.0")
 billing_manager = ServerBillingManager()
 ```
-- FastAPIインスタンスを作成
-- `ServerBillingManager`クラスのインスタンスを生成してStripe決済と課金計算を管理
+- Create FastAPI instance
+- Generate `ServerBillingManager` class instance to manage Stripe payments and billing calculations
 
-#### 2. **メインページエンドポイント (`/`)**
-- HTMLコンテンツを動的に生成して返す
-- Stripe JavaScript SDK を統合
-- リアルタイムでの課金情報表示
-- 決済フォームとカード入力UI
+#### 2. **Main Page Endpoint (`/`)**
+- Dynamically generate and return HTML content
+- Integrate Stripe JavaScript SDK
+- Real-time billing information display
+- Payment form and card input UI
 
-#### 3. **APIエンドポイント**
+#### 3. **API Endpoints**
 
 ##### `/api/create-payment-intent` (POST)
-- Stripe Payment Intentを作成
-- 現在の稼働時間に基づいて課金額を計算
-- クライアント側でカード決済を処理するためのclient_secretを返す
+- Create Stripe Payment Intent
+- Calculate billing amount based on current uptime
+- Return client_secret for processing card payments on client side
 
 ##### `/api/billing-status` (GET)
-- 現在の課金状況をJSON形式で返す
-- サーバー名、稼働時間、時間単価、合計金額を含む
+- Return current billing status in JSON format
+- Include server name, uptime, hourly rate, and total amount
 
-##### `/api/uptime` (GET)  
-- サーバーの稼働時間のみを返す
+##### `/api/uptime` (GET)
+- Return server uptime only
 
-### フロントエンド機能
+### Frontend Features
 
-#### 1. **Stripe Elements統合**
-- セキュアなカード入力フィールド
-- PCI DSS準拠のカード情報処理
+#### 1. **Stripe Elements Integration**
+- Secure card input fields
+- PCI DSS compliant card information processing
 
-#### 2. **リアルタイム更新**
-- 30秒ごとに課金情報を自動更新
-- 非同期JavaScript（fetch API）を使用
+#### 2. **Real-time Updates**
+- Automatically update billing information every 30 seconds
+- Use asynchronous JavaScript (fetch API)
 
-#### 3. **決済フロー**
-- **通常決済**: ユーザーがカード情報を入力
-- **テスト決済**: テスト用カード番号を自動使用
+#### 3. **Payment Flow**
+- **Regular Payment**: User enters card information
 
-### セキュリティ機能
-- Stripe Elements による安全なカード情報処理
-- クライアント側でのPCI DSS準拠
-- Payment Intentによる二段階決済認証
+### Security Features
+- Secure card information processing with Stripe Elements
+- PCI DSS compliance on client side
+- Two-step payment authentication with Payment Intent
 
-## 🔄 アプリケーションフローチャート
+## 🔄 Application Flow Chart
 
-### 全体のシステムフロー
+### Overall System Flow
 
 ```mermaid
 graph TD
-    A[ユーザーがWebページにアクセス] --> B[FastAPI アプリ起動]
-    B --> C[ServerBillingManager 初期化]
-    C --> D[環境変数読み込み<br/>- Stripe API Keys<br/>- サーバー設定]
+    A[User accesses web page] --> B[FastAPI app starts]
+    B --> C[ServerBillingManager initialization]
+    C --> D[Load environment variables<br/>- Stripe API Keys<br/>- Server settings]
     
-    D --> E[メインページ表示]
-    E --> F[初期課金情報取得<br/>GET /api/billing-status]
+    D --> E[Display main page]
+    E --> F[Get initial billing info<br/>GET /api/billing-status]
     
-    F --> G{ユーザーアクション}
+    F --> G{User Action}
     
-    G -->|決済開始| H[POST /api/create-payment-intent]
-    G -->|テスト決済| I[テスト決済実行]
-    G -->|情報更新| J[GET /api/billing-status]
-    G -->|自動更新| K[30秒ごとの自動更新]
+    G -->|Start Payment| H[POST /api/create-payment-intent]
     
-    H --> L[Payment Intent作成]
-    L --> M[Stripeカード入力フォーム表示]
-    M --> N[ユーザーカード情報入力]
-    N --> O[Stripe決済処理]
+    G -->|Update Info| J[GET /api/billing-status]
+    G -->|Auto Update| K[Auto update every 30 seconds]
     
-    I --> P[テストカード情報自動設定]
-    P --> Q[自動決済実行]
+    H --> L[Create Payment Intent]
+    L --> M[Display Stripe card input form]
+    M --> N[User enters card information]
+    N --> O[Stripe payment processing]
     
-    O --> R{決済結果}
-    Q --> R
+    O --> R{Payment Result}
     
-    R -->|成功| S[決済完了表示]
-    R -->|失敗| T[エラー表示]
+    R -->|Success| S[Display payment completion]
+    R -->|Failure| T[Display error]
     
     S --> J
     T --> J
@@ -365,33 +347,33 @@ graph TD
     style T fill:#ffebee
 ```
 
-### 課金計算フロー（ServerBillingManager）
+### Billing Calculation Flow (ServerBillingManager)
 
 ```mermaid
 graph TD
-    A[get_server_uptime 呼び出し] --> B[psutil.boot_time 取得]
-    B --> C[現在時刻 - 起動時刻 = 稼働秒数]
-    C --> D[秒数を時間・分・秒に変換]
+    A[get_server_uptime called] --> B[Get psutil.boot_time]
+    B --> C[Current time - boot time = uptime seconds]
+    C --> D[Convert seconds to hours/minutes/seconds]
     
-    D --> E[calculate_billing_amount 呼び出し]
-    E --> F[稼働時間を分単位で計算]
-    F --> G{稼働時間チェック}
+    D --> E[calculate_billing_amount called]
+    E --> F[Calculate uptime in minutes]
+    F --> G{Check uptime}
     
-    G -->|1分未満| H[最小課金: hourly_rate ÷ 60]
-    G -->|1分以上| I[課金額 = 稼働時間 × hourly_rate]
+    G -->|Less than 1 minute| H[Minimum billing: hourly_rate ÷ 60]
+    G -->|1 minute or more| I[Billing amount = uptime × hourly_rate]
     
-    H --> J[円単位に四捨五入]
+    H --> J[Round to yen units]
     I --> J
-    J --> K[課金情報オブジェクト作成]
+    J --> K[Create billing info object]
     
-    K --> L{呼び出し元}
-    L -->|Payment Intent| M[Stripe Payment Intent作成]
-    L -->|Invoice| N[Stripe Invoice作成]  
-    L -->|Status API| O[JSON レスポンス]
+    K --> L{Caller}
+    L -->|Payment Intent| M[Create Stripe Payment Intent]
+    L -->|Invoice| N[Create Stripe Invoice]
+    L -->|Status API| O[JSON response]
     
-    M --> P[client_secret返却]
-    N --> Q[Invoice ID返却]
-    O --> R[課金サマリー返却]
+    M --> P[Return client_secret]
+    N --> Q[Return Invoice ID]
+    O --> R[Return billing summary]
     
     style A fill:#e1f5fe
     style E fill:#e1f5fe
@@ -402,33 +384,33 @@ graph TD
     style O fill:#e8f5e8
 ```
 
-### 決済処理フロー（フロントエンド）
+### Payment Processing Flow (Frontend)
 
 ```mermaid
 graph TD
-    A[決済開始ボタンクリック] --> B[createPayment 関数実行]
+    A[Start payment button clicked] --> B[Execute createPayment function]
     B --> C[POST /api/create-payment-intent]
-    C --> D{API レスポンス}
+    C --> D{API Response}
     
-    D -->|成功| E[client_secret取得]
-    D -->|失敗| F[エラーメッセージ表示]
+    D -->|Success| E[Get client_secret]
+    D -->|Failure| F[Display error message]
     
-    E --> G[Stripe Elements初期化]
-    G --> H[カード入力フォーム表示]
-    H --> I[ユーザーカード情報入力]
-    I --> J[決済実行ボタンクリック]
+    E --> G[Initialize Stripe Elements]
+    G --> H[Display card input form]
+    H --> I[User enters card information]
+    I --> J[Execute payment button clicked]
     
-    J --> K[confirmPayment 関数実行]
-    K --> L[stripe.confirmCardPayment 実行]
-    L --> M{Stripe 決済結果}
+    J --> K[Execute confirmPayment function]
+    K --> L[Execute stripe.confirmCardPayment]
+    L --> M{Stripe Payment Result}
     
-    M -->|成功| N[決済完了メッセージ]
-    M -->|失敗| O[決済エラーメッセージ]
+    M -->|Success| N[Payment completion message]
+    M -->|Failure| O[Payment error message]
     
-    N --> P[課金情報更新]
-    O --> Q[フォーム再表示]
+    N --> P[Update billing information]
+    O --> Q[Redisplay form]
     
-    F --> R[エラー状態表示]
+    F --> R[Display error state]
     
     style A fill:#e1f5fe
     style B fill:#f3e5f5
@@ -439,88 +421,54 @@ graph TD
     style F fill:#ffebee
 ```
 
-### テスト決済専用フロー
 
-```mermaid
-graph TD
-    A[テスト決済ボタンクリック] --> B[testPayment 関数実行]
-    B --> C[POST /api/create-payment-intent]
-    C --> D[client_secret取得]
-    
-    D --> E[隠しStripe Elements作成]
-    E --> F[テストカード情報設定<br/>4242424242424242]
-    F --> G[stripe.createPaymentMethod]
-    G --> H[PaymentMethod作成]
-    
-    H --> I[stripe.confirmCardPayment<br/>自動実行]
-    I --> J{決済結果}
-    
-    J -->|成功| K[テスト決済完了表示]
-    J -->|失敗| L[テストエラー表示]
-    
-    K --> M[課金情報自動更新]
-    L --> N[エラー状態表示]
-    
-    style A fill:#e1f5fe
-    style F fill:#fff3e0
-    style I fill:#fff3e0
-    style K fill:#e8f5e8
-    style L fill:#ffebee
-```
+## 📋 Beginner's Guide
 
-## 📋 初心者向け解説
+### Understanding web_app.py
 
-### web_app.py の理解ポイント
+#### 1. **What is FastAPI?**
+- High-performance web framework for Python
+- Automatically generates API documentation
+- Supports asynchronous processing
 
-#### 1. **FastAPI とは？**
-- Python用の高速なWebフレームワーク
-- 自動的にAPIドキュメントを生成
-- 非同期処理をサポート
+#### 2. **How Stripe Integration Works**
+- **Payment Intent**: Object representing payment "intent"
+- **Client Secret**: Key for completing payment on frontend
+- **Elements**: Secure card input UI
 
-#### 2. **Stripe Integration の仕組み**
-- **Payment Intent**: 決済の「意図」を表すオブジェクト
-- **Client Secret**: フロントエンドで決済を完了するためのキー
-- **Elements**: セキュアなカード入力UI
+#### 3. **Frontend and Backend Coordination**
+- **Backend (Python)**: Billing calculations, Stripe API calls
+- **Frontend (JavaScript)**: User interface, card input
 
-#### 3. **フロントエンドとバックエンドの連携**
-- **バックエンド（Python）**: 課金計算、Stripe API呼び出し
-- **フロントエンド（JavaScript）**: ユーザーインターフェース、カード入力
+#### 4. **Security Considerations**
+- Card information is not sent directly to server
+- Stripe Elements handles securely
+- PCI DSS compliant implementation
 
-#### 4. **セキュリティの考慮点**
-- カード情報は直接サーバーに送信されない
-- Stripe Elementsが安全に処理
-- PCI DSS準拠の実装
+#### 5. **Error Handling**
+- Try-catch processing for each API call
+- User-friendly error messages
+- Proper handling of payment failures
 
-#### 5. **エラーハンドリング**
-- 各API呼び出しでtry-catch処理
-- ユーザーにわかりやすいエラーメッセージ
-- 決済失敗時の適切な処理
+### Development Considerations
 
-### 開発時の注意点
-
-#### 1. **環境変数管理**
+#### 1. **Environment Variable Management**
 ```bash
-# 必須の環境変数
-STRIPE_SECRET_KEY=sk_test_...    # サーバーサイド用
-STRIPE_PUBLISHABLE_KEY=pk_test_...  # クライアントサイド用
+# Required environment variables
+STRIPE_SECRET_KEY=sk_test_...    # For server side
+STRIPE_PUBLISHABLE_KEY=pk_test_...  # For client side
 ```
 
-#### 2. **テスト用カード番号**
-- `4242424242424242`: 成功パターン
-- `4000000000000002`: カード拒否パターン
-- `4000000000009995`: 残高不足パターン
+#### 2. **Test Card Numbers**
+- `4242424242424242`: Success pattern
+- `4000000000000002`: Card declined pattern
+- `4000000000009995`: Insufficient funds pattern
 
-#### 3. **本番環境への移行**
-- テストキーから本番キーに変更
-- HTTPS必須
-- Webhook検証の実装
+#### 3. **Production Environment Migration**
+- Change from test keys to live keys
+- HTTPS required
+- Implement webhook verification
 
-## 📄 ライセンス
-
-MIT License
-
-
-## 📄 ライセンス
+## 📄 License
 
 MIT License
-

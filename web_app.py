@@ -7,19 +7,19 @@ from server_billing import ServerBillingManager
 
 app = FastAPI(title="Server Billing System", version="1.0.0")
 
-# 課金管理システムを初期化
+# Initialize billing management system
 billing_manager = ServerBillingManager()
 
 @app.get("/", response_class=HTMLResponse)
 async def index():
-    """メインページ"""
+    """Main page"""
     html_content = f"""
     <!DOCTYPE html>
-    <html lang="ja">
+    <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>サーバー課金システム</title>
+        <title>Server Billing System</title>
         <script src="https://js.stripe.com/v3/"></script>
         <style>
             body {{
@@ -94,36 +94,36 @@ async def index():
     <body>
         <div class="container">
             <div class="header">
-                <h1>🚀 サーバー課金システム</h1>
-                <p>稼働時間ベースの自動課金</p>
+                <h1>🚀 Server Billing System</h1>
+                <p>Automatic billing based on uptime</p>
             </div>
             
             <div id="billing-info" class="billing-info">
-                <h3>📊 現在の課金状況</h3>
+                <h3>📊 Current Billing Status</h3>
                 <div id="server-info">
-                    <p><strong>サーバー名:</strong> <span id="server-name">読み込み中...</span></p>
-                    <p><strong>稼働時間:</strong> <span id="uptime">読み込み中...</span></p>
-                    <p><strong>時間単価:</strong> <span id="hourly-rate">読み込み中...</span></p>
-                    <p><strong>現在の課金額:</strong> <span id="billing-amount">読み込み中...</span></p>
+                    <p><strong>Server Name:</strong> <span id="server-name">Loading...</span></p>
+                    <p><strong>Uptime:</strong> <span id="uptime">Loading...</span></p>
+                    <p><strong>Hourly Rate:</strong> <span id="hourly-rate">Loading...</span></p>
+                    <p><strong>Current Billing Amount:</strong> <span id="billing-amount">Loading...</span></p>
                 </div>
             </div>
             
             <div id="payment-status" class="status"></div>
             
             <div style="text-align: center;">
-                <button onclick="createPayment()" class="button">💳 決済を開始</button>
-                <button onclick="updateBillingInfo()" class="button">🔄 情報更新</button>
+                <button onclick="createPayment()" class="button">💳 Start Payment</button>
+                <button onclick="updateBillingInfo()" class="button">🔄 Update Info</button>
             </div>
             
             <div id="payment-form">
-                <h3>💳 カード情報入力</h3>
+                <h3>💳 Enter Card Information</h3>
                 <div id="card-element"></div>
-                <button onclick="confirmPayment()" class="button">決済実行</button>
-                <button onclick="cancelPayment()" class="button" style="background: #dc3545;">キャンセル</button>
+                <button onclick="confirmPayment()" class="button">Execute Payment</button>
+                <button onclick="cancelPayment()" class="button" style="background: #dc3545;">Cancel</button>
             </div>
             
             <div class="update-info">
-                <p>💡 情報は30秒ごとに自動更新されます</p>
+                <p>💡 Information is automatically updated every 30 seconds</p>
             </div>
         </div>
 
@@ -150,7 +150,7 @@ async def index():
 
             async function createPayment() {{
                 try {{
-                    // Payment Intentを作成
+                    // Create Payment Intent
                     const response = await fetch('/api/create-payment-intent', {{
                         method: 'POST',
                         headers: {{
@@ -163,23 +163,23 @@ async def index():
                     if (data.success) {{
                         clientSecret = data.client_secret;
                         
-                        // カード入力フォームを表示
+                        // Show card input form
                         document.getElementById('payment-form').style.display = 'block';
-                        document.getElementById('payment-status').innerHTML = `💳 カード情報を入力して決済を完了してください（課金額: ${{data.billing_info.billing_amount}}円）`;
+                        document.getElementById('payment-status').innerHTML = `💳 Please enter card information to complete payment (Billing amount: ${{data.billing_info.billing_amount}} yen)`;
                         document.getElementById('payment-status').style.background = '#d4edda';
                         document.getElementById('payment-status').style.color = '#155724';
                         
-                        // Stripe Elementsをセットアップ
+                        // Setup Stripe Elements
                         await setupStripeElements();
                         
                     }} else {{
-                        document.getElementById('payment-status').innerHTML = `❌ 決済準備エラー: ${{data.error}}`;
+                        document.getElementById('payment-status').innerHTML = `❌ Payment setup error: ${{data.error}}`;
                         document.getElementById('payment-status').style.background = '#f8d7da';
                         document.getElementById('payment-status').style.color = '#721c24';
                     }}
                 }} catch (error) {{
                     console.error('Error:', error);
-                    document.getElementById('payment-status').innerHTML = '❌ 決済処理に失敗しました';
+                    document.getElementById('payment-status').innerHTML = '❌ Payment processing failed';
                     document.getElementById('payment-status').style.background = '#f8d7da';
                     document.getElementById('payment-status').style.color = '#721c24';
                 }}
@@ -187,7 +187,7 @@ async def index():
 
             async function confirmPayment() {{
                 if (!clientSecret || !cardElement) {{
-                    document.getElementById('payment-status').innerHTML = '❌ 決済の準備ができていません';
+                    document.getElementById('payment-status').innerHTML = '❌ Payment is not ready';
                     document.getElementById('payment-status').style.background = '#f8d7da';
                     document.getElementById('payment-status').style.color = '#721c24';
                     return;
@@ -200,21 +200,21 @@ async def index():
                 }});
 
                 if (error) {{
-                    document.getElementById('payment-status').innerHTML = `❌ 決済エラー: ${{error.message}}`;
+                    document.getElementById('payment-status').innerHTML = `❌ Payment error: ${{error.message}}`;
                     document.getElementById('payment-status').style.background = '#f8d7da';
                     document.getElementById('payment-status').style.color = '#721c24';
                 }} else {{
-                    document.getElementById('payment-status').innerHTML = `✅ 決済完了！ Payment ID: ${{paymentIntent.id}}`;
+                    document.getElementById('payment-status').innerHTML = `✅ Payment completed! Payment ID: ${{paymentIntent.id}}`;
                     document.getElementById('payment-status').style.background = '#d4edda';
                     document.getElementById('payment-status').style.color = '#155724';
                     document.getElementById('payment-form').style.display = 'none';
-                    updateBillingInfo(); // 決済後に情報を更新
+                    updateBillingInfo(); // Update information after payment
                 }}
             }}
 
             function cancelPayment() {{
                 document.getElementById('payment-form').style.display = 'none';
-                document.getElementById('payment-status').innerHTML = '❌ 決済がキャンセルされました';
+                document.getElementById('payment-status').innerHTML = '❌ Payment was cancelled';
                 document.getElementById('payment-status').style.background = '#f8d7da';
                 document.getElementById('payment-status').style.color = '#721c24';
             }}
@@ -226,17 +226,17 @@ async def index():
                     
                     document.getElementById('server-name').textContent = data.server_name;
                     document.getElementById('uptime').textContent = data.uptime;
-                    document.getElementById('hourly-rate').textContent = `${{data.hourly_rate}}円/時間`;
-                    document.getElementById('billing-amount').textContent = `${{data.total_amount}}円`;
+                    document.getElementById('hourly-rate').textContent = `${{data.hourly_rate}} yen/hour`;
+                    document.getElementById('billing-amount').textContent = `${{data.total_amount}} yen`;
                 }} catch (error) {{
                     console.error('Error updating billing info:', error);
                 }}
             }}
 
-            // 初期化時に課金情報を取得
+            // Get billing information on initialization
             updateBillingInfo();
             
-            // 30秒ごとに自動更新
+            // Auto-update every 30 seconds
             setInterval(updateBillingInfo, 30000);
         </script>
     </body>
@@ -246,24 +246,24 @@ async def index():
 
 @app.post("/api/create-payment-intent")
 async def create_payment_intent():
-    """Payment Intentを作成"""
+    """Create Payment Intent"""
     result = billing_manager.create_payment_intent()
     return JSONResponse(content=result)
 
 @app.get("/api/billing-status")
 async def get_billing_status():
-    """現在の課金状況を取得"""
+    """Get current billing status"""
     return JSONResponse(content=billing_manager.get_billing_summary())
 
 @app.get("/api/uptime")
 async def get_uptime():
-    """サーバーの稼働時間を取得"""
+    """Get server uptime"""
     return JSONResponse(content=billing_manager.get_server_uptime())
 
 if __name__ == "__main__":
     port = int(os.getenv('PORT', 8000))
-    print(f"🌐 サーバー課金システムを起動中...")
+    print(f"🌐 Starting Server Billing System...")
     print(f"📍 URL: http://localhost:{port}")
-    print(f"💡 ブラウザでアクセスして決済をテストしてください")
+    print(f"💡 Access with browser to test payments")
     
     uvicorn.run("web_app:app", host="0.0.0.0", port=port, reload=True)

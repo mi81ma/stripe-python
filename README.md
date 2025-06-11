@@ -2,6 +2,10 @@
 
 A Python application that performs automatic billing with Stripe based on server uptime.
 
+
+## App Demo
+![Demo](/app_demo.gif)
+
 ## 🚀 Features
 
 - **Real-time uptime monitoring**: Get accurate server uptime using psutil
